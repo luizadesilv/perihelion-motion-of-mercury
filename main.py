@@ -48,14 +48,19 @@ def evolve_velocity_verlet(vec_rM_old, vec_vM_old, alpha, beta):
 
 # Runge-Kutta 2 - Ponto Central
 def evolve_runge_kutta2(vec_rM_old, vec_vM_old, alpha, beta):
-    def dydx(x, y):
-        return x + y - 2
+    temp = 1 + alpha * rS / vec_rM_old.mag + beta * rL2 / vec_rM_old.mag ** 2
+    aMS = c_a * temp / vec_rM_old.mag ** 2
+    vec_aMS = - aMS * (vec_rM_old / vec_rM_old.mag)
 
-    k1 = dydx(vec_rM_old.mag, vec_rM_old.mag)
-    k2 = dydx((vec_rM_old + 0.5*dt).mag, (vec_vM_old + 0.5*k1*dt).mag)
+    k1r = vec_vM_old
+    k1v = vec_aMS
+    k2r = vec_vM_old + k1v * 0.5 * dt
+    temp2 = 1 + alpha * rS / (vec_rM_old + k1r * 0.5 * dt).mag + beta * rL2 / (vec_rM_old + k1r * 0.5 * dt).mag ** 2
+    aMS2 = c_a * temp2 / (vec_rM_old + k1r * 0.5 * dt).mag ** 2
+    k2v = -aMS2 * (vec_rM_old + k1r * 0.5 * dt) / (vec_rM_old + k1r * 0.5 * dt).mag
 
-    vec_vM_new = vec_vM_old.mag + k2 * dt
-    vec_rM_new = vec_rM_old.mag + dt
+    vec_vM_new = vec_vM_old + k2v * dt
+    vec_rM_new = vec_rM_old + k2r * dt
 
     return vec_rM_new, vec_vM_new
 
