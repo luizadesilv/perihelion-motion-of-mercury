@@ -55,9 +55,11 @@ def evolve_runge_kutta2(vec_rM_old, vec_vM_old, alpha, beta):
     k1r = vec_vM_old
     k1v = vec_aMS
     k2r = vec_vM_old + k1v * 0.5 * dt
-    temp2 = 1 + alpha * rS / (vec_rM_old + k1r * 0.5 * dt).mag + beta * rL2 / (vec_rM_old + k1r * 0.5 * dt).mag ** 2
+
+    vec_rM_old2 = vec_rM_old + k1r * 0.5 * dt
+    temp2 = 1 + alpha * rS / vec_rM_old2.mag + beta * rL2 / vec_rM_old2.mag ** 2
     aMS2 = c_a * temp2 / (vec_rM_old + k1r * 0.5 * dt).mag ** 2
-    k2v = -aMS2 * (vec_rM_old + k1r * 0.5 * dt) / (vec_rM_old + k1r * 0.5 * dt).mag
+    k2v = -aMS2 * vec_rM_old2 / vec_rM_old2.mag
 
     vec_vM_new = vec_vM_old + k2v * dt
     vec_rM_new = vec_rM_old + k2r * dt
