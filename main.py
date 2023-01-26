@@ -14,10 +14,11 @@ def evolve_mercury(vec_rM_old, vec_vM_old, alpha, beta):
     # Update position vector
     vec_rM_new = vec_rM_old + vec_vM_new * dt
 
-    # error = (1 * vec_rM_new ** 2) * 0.5 + (1 * vec_vM_new ** 2) * 0.5
-    # print(error)
+    GM = 1.147e-3
+    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
+                ((0.5 * vM0 ** 2) - (GM / rM0)))
 
-    return vec_rM_new, vec_vM_new
+    return vec_rM_new, vec_vM_new, error
 
 
 # euler-explicito
@@ -28,7 +29,11 @@ def evolve_euler_explicito(vec_rM_old, vec_vM_old, alpha, beta):
     vec_rM_new = vec_rM_old + vec_vM_old * dt
     vec_vM_new = vec_vM_old + vec_aMS * dt
 
-    return vec_rM_new, vec_vM_new
+    GM = 1.147e-3
+    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
+                ((0.5 * vM0 ** 2) - (GM / rM0)))
+
+    return vec_rM_new, vec_vM_new, error
 
 
 # velocity verlet
@@ -43,7 +48,11 @@ def evolve_velocity_verlet(vec_rM_old, vec_vM_old, alpha, beta):
     vec_aMS1 = - aMS1 * (vec_rM_new / vec_rM_new.mag)
     vec_vM_new = vec_vM_old + (0.5 * (vec_aMS + vec_aMS1) * dt)
 
-    return vec_rM_new, vec_vM_new
+    GM = 1.147e-3
+    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
+                ((0.5 * vM0 ** 2) - (GM / rM0)))
+
+    return vec_rM_new, vec_vM_new, error
 
 
 # Runge-Kutta 2 - Ponto Central
@@ -64,7 +73,11 @@ def evolve_runge_kutta2(vec_rM_old, vec_vM_old, alpha, beta):
     vec_vM_new = vec_vM_old + k2v * dt
     vec_rM_new = vec_rM_old + k2r * dt
 
-    return vec_rM_new, vec_vM_new
+    GM = 1.147e-3
+    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
+                ((0.5 * vM0 ** 2) - (GM / rM0)))
+
+    return vec_rM_new, vec_vM_new, error
 
 
 if __name__ == '__main__':
@@ -98,19 +111,26 @@ if __name__ == '__main__':
     alpha = 0.0
     beta = 0.0
 
+    energy_error = [[], [], [], []]
+
     # Execute the loop as long as t < 2*TM
     while t < 2 * TM:
         # Set the frame rate (you can choose a higher rate to accelerate the program)
-        rate(500)
+        rate(5000)
         # Update the drawn trajectory with the current position
         M.trajectory.append(pos=M.pos)
 
         # Update velocity and position
-        # M.pos, M.velocity = evolve_mercury(M.pos, M.velocity, alpha, beta)
-        # M.pos, M.velocity = evolve_euler_explicito(M.pos, M.velocity, alpha, beta)
-        # M.pos, M.velocity = evolve_velocity_verlet(M.pos, M.velocity, alpha, beta)
-        M.pos, M.velocity = evolve_runge_kutta2(M.pos, M.velocity, alpha, beta)
+        M.pos, M.velocity, error1 = evolve_mercury(M.pos, M.velocity, alpha, beta)
+        energy_error[0].append(error1)
+        M.pos, M.velocity, error2 = evolve_euler_explicito(M.pos, M.velocity, alpha, beta)
+        energy_error[1].append(error2)
+        M.pos, M.velocity, error3 = evolve_velocity_verlet(M.pos, M.velocity, alpha, beta)
+        energy_error[2].append(error3)
+        M.pos, M.velocity, error4 = evolve_runge_kutta2(M.pos, M.velocity, alpha, beta)
+        energy_error[3].append(error4)
 
         # Advance time by one step
         t = t + dt
+    print(energy_error)
 

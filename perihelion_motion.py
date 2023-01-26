@@ -1,6 +1,8 @@
+import numpy as np
 import pandas as pd
 from vpython import *
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def evolve_mercury(vec_rM_old, vec_vM_old, alpha, beta):
@@ -36,7 +38,7 @@ if __name__ == '__main__':
     vec_vM0 = vector(vM0, 0, 0)
 
     # Definition of the time step
-    dt = 2 * vM0 / c_a / 20
+    dt = 2 * vM0 / c_a / 200
 
     # Define the initial coordinates; M = mercury, S = Sun
     M = sphere(pos=vec_rM0, radius=0.5, color=color.red)
@@ -51,45 +53,46 @@ if __name__ == '__main__':
 
     # Extract multiple position sof the perihelion
 
-    alpha = [0, 1.e4, 2.e4, 3.e4, 4.e4, 5.e4, 6.e4, 7.e4, 8.e4, 9.e4]
-    beta = 0
-
+    beta = [0, 1.e4, 2.e4, 3.e4, 4.e4, 5.e4, 6.e4, 7.e4, 8.e4, 9.e4, 1.e5]
+    alpha = 0
     # alpha = 0
-    # beta = [0, 1.e4, 2.e4, 3.e4, 4.e4, 5.e4, 6.e4, 7.e4, 8.e4, 9.e4]
-
-    vec_rM_last = vec_rM0
-    max_i = 10
-    sum_angle = 0
-    list_perih = []
-    sum_angle_list = [0]
-    i = 0
-    while i < max_i:
-        vec_rM_before_last = vec_rM_last
-        vec_rM_last = vector(M.pos)
-        rate(500)
-        M.trajectory.append(pos=M.pos)
-        M.pos, M.velocity = evolve_mercury(M.pos, M.velocity, alpha[i],  beta)
-        if (vec_rM_last.mag < M.pos.mag) & (vec_rM_last.mag < vec_rM_before_last.mag):
-            list_perih.append(vec_rM_last)
-            i = i + 1
-            if i > 1:
-                print(list_perih)
-                sphere(color=color.green, radius=0.2, pos=vec_rM_last)
-                print(f'Turn: {i}, perihelion growth: {angle_between(list_perih[-2], list_perih[-1])}')
-                sum_angle = sum_angle + angle_between(list_perih[-2], list_perih[-1])
-                sum_angle_list.append(sum_angle / (max_i - 1))
-                print(sum_angle_list)
+    # beta = 3
+    sum_angle_list = []
+    for j in range(len(beta)):
+        vec_rM_last = vec_rM0
+        max_i = 10
+        sum_angle = 0
+        list_perih = []
+        i = 0
+        while i < max_i:
+            vec_rM_before_last = vec_rM_last
+            vec_rM_last = vector(M.pos)
+            rate(5000)
+            M.trajectory.append(pos=M.pos)
+            M.pos, M.velocity = evolve_mercury(M.pos, M.velocity, alpha,  beta[j])
+            if (vec_rM_last.mag < M.pos.mag) & (vec_rM_last.mag < vec_rM_before_last.mag):
+                list_perih.append(vec_rM_last)
+                i = i + 1
+                if i > 1:
+                    sphere(color=color.green, radius=0.2, pos=vec_rM_last)
+                    print(f'Turn: {i}, perihelion growth: {angle_between(list_perih[i-2], list_perih[i-1])}')
+                    sum_angle = sum_angle + angle_between(list_perih[i-2], list_perih[i-1])
     # Display the average
-    print(f'Average perihelion growth: {sum_angle / (len(list_perih)-1 ) * 3. / 3600 * 4.15 * 100}')
+    print(f'Average perihelion growth: {sum_angle / len(list_perih) - 1}')
+    sum_angle_list.append(sum_angle/9)
+    print(sum_angle_list)
+    pg_minutes = (sum_angle_list[-1] / 1.e5 * 3) * 60 * 60
+    pg_100years = pg_minutes * 415
+    print(f'Perihelion growth: {pg_minutes} minutes')
+    print(f'Perihelion motion per 100 earth years: {pg_100years}')
 
-    # plot image
-
-    print(len(alpha), len(sum_angle_list))
-    data = pd.DataFrame({"alpha": alpha, "perihelion growth": sum_angle_list})
-    plot = sns.lmplot(x="alpha", y="perihelion growth", data=data)
-    plot.savefig('alpha.jpg')
-
-    # print(len(beta), len(sum_angle_list))
+    # plt.scatter(beta, sum_angle_list)
+    # plt.legend([f'δΘ(α = 0, β) = {sum_angle_list[-1]} x β'])
+    # plt.savefig(r'C:\Users\Luiza D. da Silva\Documents\GitHub\Prova1MetCompB\beta.png')
+    #
     # data = pd.DataFrame({"beta": beta, "perihelion growth": sum_angle_list})
     # plot = sns.lmplot(x="beta", y="perihelion growth", data=data)
-    # plot.savefig('beta.jpg')
+    # plt.legend([f'δΘ(α = 0, β) = {sum_angle_list[-1]} x β'])
+    # plot.savefig(r'C:\Users\Luiza D. da Silva\Documents\GitHub\Prova1MetCompB\beta_linear_reg.jpg')
+
+    print('ok')
