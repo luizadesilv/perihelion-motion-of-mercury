@@ -4,7 +4,7 @@ from vpython import *
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
+# Euler-Cromer
 def evolve_mercury(vec_rM_old, vec_vM_old, alpha, beta):
     # Compute the strength of the acceleration
     temp = 1 + alpha * rS / vec_rM_old.mag + beta * rL2 / vec_rM_old.mag ** 2
@@ -19,7 +19,7 @@ def evolve_mercury(vec_rM_old, vec_vM_old, alpha, beta):
     return vec_rM_new, vec_vM_new
 
 
-# Calculate the angle between the perihelions for each pair of successive turns
+# Calculate the angle between the perihelion for each pair of successive turns
 def angle_between(v1, v2):
     return acos(dot(v1, v2) / (v1.mag * v2.mag)) * 180. / pi
 
@@ -52,12 +52,13 @@ if __name__ == '__main__':
     M.trajectory = curve(color=color.white)
 
     # Extract multiple position sof the perihelion
-
     beta = [0, 1.e4, 2.e4, 3.e4, 4.e4, 5.e4, 6.e4, 7.e4, 8.e4, 9.e4, 1.e5]
     alpha = 0
-    # alpha = 0
-    # beta = 3
+    # alpha = [0, 1.e4, 2.e4, 3.e4, 4.e4, 5.e4, 6.e4, 7.e4, 8.e4, 9.e4, 1.e5]
+    # beta = 0
     sum_angle_list = []
+
+    # For each beta, run 10 turns
     for j in range(len(beta)):
         vec_rM_last = vec_rM0
         max_i = 10
@@ -77,22 +78,19 @@ if __name__ == '__main__':
                     sphere(color=color.green, radius=0.2, pos=vec_rM_last)
                     print(f'Turn: {i}, perihelion growth: {angle_between(list_perih[i-2], list_perih[i-1])}')
                     sum_angle = sum_angle + angle_between(list_perih[i-2], list_perih[i-1])
-    # Display the average
-    print(f'Average perihelion growth: {sum_angle / len(list_perih) - 1}')
+
+    # Display the average Perihelion Growth
+    print(f'Perihelion growth β=10e5: {sum_angle / len(list_perih) - 1}')
     sum_angle_list.append(sum_angle/9)
-    print(sum_angle_list)
     pg_minutes = (sum_angle_list[-1] / 1.e5 * 3) * 60 * 60
     pg_100years = pg_minutes * 415
     print(f'Perihelion growth: {pg_minutes} minutes')
     print(f'Perihelion motion per 100 earth years: {pg_100years}')
 
-    # plt.scatter(beta, sum_angle_list)
-    # plt.legend([f'δΘ(α = 0, β) = {sum_angle_list[-1]} x β'])
-    # plt.savefig(r'C:\Users\Luiza D. da Silva\Documents\GitHub\Prova1MetCompB\beta.png')
-    #
-    # data = pd.DataFrame({"beta": beta, "perihelion growth": sum_angle_list})
-    # plot = sns.lmplot(x="beta", y="perihelion growth", data=data)
-    # plt.legend([f'δΘ(α = 0, β) = {sum_angle_list[-1]} x β'])
-    # plot.savefig(r'C:\Users\Luiza D. da Silva\Documents\GitHub\Prova1MetCompB\beta_linear_reg.jpg')
+    # Plot image δΘ(α = 0, β) x β and δΘ(α, β = 0) x α
+    data = pd.DataFrame({"beta": beta, "perihelion growth": sum_angle_list})
+    plot = sns.lmplot(x="beta", y="perihelion growth", data=data)
+    plt.legend([f'δΘ(α = 0, β) = {sum_angle_list[-1]} x β'])
+    plot.savefig(r'C:\Users\Luiza D. da Silva\Documents\GitHub\Prova1MetCompB\beta_linear_reg.jpg')
 
-    print('ok')
+    print('End')
