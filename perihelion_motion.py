@@ -80,9 +80,10 @@ if __name__ == '__main__':
                     print(f'Turn: {i}, perihelion growth: {angle_between(list_perih[i-2], list_perih[i-1])}')
                     sum_angle = sum_angle + angle_between(list_perih[i-2], list_perih[i-1])
 
-    # Display the average Perihelion Growth
-    print(f'Perihelion growth β=10e5: {sum_angle / len(list_perih) - 1}')
-    sum_angle_list.append(sum_angle/9)
+        # Display the average Perihelion Growth for each beta/alpha
+        print(f'Perihelion growth: {sum_angle / (len(list_perih)-1)}')
+        sum_angle_list.append(sum_angle/9)
+
     pg_minutes = (sum_angle_list[-1] / 1.e5 * 3) * 60 * 60
     pg_100years = pg_minutes * 415
     print(f'Perihelion growth: {pg_minutes} minutes')
