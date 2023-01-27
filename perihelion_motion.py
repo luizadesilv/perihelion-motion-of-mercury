@@ -4,6 +4,7 @@ from vpython import *
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 # Euler-Cromer
 def evolve_mercury(vec_rM_old, vec_vM_old, alpha, beta):
     # Compute the strength of the acceleration
