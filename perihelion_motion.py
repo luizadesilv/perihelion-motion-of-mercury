@@ -93,6 +93,6 @@ if __name__ == '__main__':
     data = pd.DataFrame({"beta": beta, "perihelion growth": sum_angle_list})
     plot = sns.lmplot(x="beta", y="perihelion growth", data=data)
     plt.legend([f'δΘ(α = 0, β) = {sum_angle_list[-1]} x β'])
-    plot.savefig(r'C:\Users\Luiza D. da Silva\Documents\GitHub\Prova1MetCompB\beta_linear_reg.jpg')
+    plot.savefig(r"beta_linear_reg.png")
 
     print('End')

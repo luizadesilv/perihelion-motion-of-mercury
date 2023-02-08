@@ -17,11 +17,10 @@ def evolve_mercury(vec_rM_old, vec_vM_old, alpha, beta):
     vec_rM_new = vec_rM_old + vec_vM_new * dt
 
     # Calculate energy error
-    GM = 1.147e-3
-    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
-                ((0.5 * vM0 ** 2) - (GM / rM0)))
+    error = ((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * (vM0 ** 2)) + (GM / rM0)) / (
+                0.5 * (vM0 ** 2) - (GM / rM0))
 
-    return vec_rM_new, vec_vM_new, error
+    return vec_rM_new, vec_vM_new, abs(error)
 
 
 # euler-explicito
@@ -33,11 +32,10 @@ def evolve_euler_explicito(vec_rM_old, vec_vM_old, alpha, beta):
     vec_vM_new = vec_vM_old + vec_aMS * dt
 
     # Calculate energy error
-    GM = 1.147e-3
-    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
-                ((0.5 * vM0 ** 2) - (GM / rM0)))
+    error = ((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * (vM0 ** 2)) + (GM / rM0)) / (
+                0.5 * (vM0 ** 2) - (GM / rM0))
 
-    return vec_rM_new, vec_vM_new, error
+    return vec_rM_new, vec_vM_new, abs(error)
 
 
 # velocity verlet
@@ -53,11 +51,10 @@ def evolve_velocity_verlet(vec_rM_old, vec_vM_old, alpha, beta):
     vec_vM_new = vec_vM_old + (0.5 * (vec_aMS + vec_aMS1) * dt)
 
     # Calculate energy error
-    GM = 1.147e-3
-    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
-                ((0.5 * vM0 ** 2) - (GM / rM0)))
+    error = ((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * (vM0 ** 2)) + (GM / rM0)) / (
+                0.5 * (vM0 ** 2) - (GM / rM0))
 
-    return vec_rM_new, vec_vM_new, error
+    return vec_rM_new, vec_vM_new, abs(error)
 
 
 # Runge-Kutta 2 - Ponto Central
@@ -79,11 +76,9 @@ def evolve_runge_kutta2(vec_rM_old, vec_vM_old, alpha, beta):
     vec_rM_new = vec_rM_old + k2r * dt
 
     # Calculate energy error
-    GM = 1.147e-3
-    error = abs(((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * vM0 ** 2) + (GM / rM0)) /
-                ((0.5 * vM0 ** 2) - (GM / rM0)))
+    error = ((0.5 * vec_vM_new.mag ** 2) - (GM / vec_rM_new.mag) - (0.5 * (vM0 ** 2)) + (GM / rM0)) / (0.5 * (vM0 ** 2) - (GM / rM0))
 
-    return vec_rM_new, vec_vM_new, error
+    return vec_rM_new, vec_vM_new, abs(error)
 
 
 if __name__ == '__main__':
@@ -94,6 +89,8 @@ if __name__ == '__main__':
     TM = 8.80e+1  # Orbit period of Mercury
     rS = 2.95e-7  # Schwarzschild radius of Sun, in units of R0
     rL2 = 8.19e-7  # Specific angular momentum, in units of R0**2
+    GM = 0.9906  # The same as c_a
+    print(GM)
 
     vec_rM0 = vector(0, rM0, 0)
     vec_vM0 = vector(vM0, 0, 0)
@@ -106,13 +103,13 @@ if __name__ == '__main__':
     M1 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.red)
     S1 = sphere(pos=vector(0, 0, 0), radius=1.5, color=color.yellow)
     # Euler-explicito
-    M2 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.red)
+    M2 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.green)
     S2 = sphere(pos=vector(0, 0, 0), radius=1.5, color=color.yellow)
     # Velocity-verlet
-    M3 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.red)
+    M3 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.blue)
     S3 = sphere(pos=vector(0, 0, 0), radius=1.5, color=color.yellow)
     # Runge-kutta2
-    M4 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.red)
+    M4 = sphere(pos=vector(0, rM0, 0), radius=0.5, color=color.magenta)
     S4 = sphere(pos=vector(0, 0, 0), radius=1.5, color=color.yellow)
 
     # And the initial velocities
@@ -183,16 +180,16 @@ if __name__ == '__main__':
     print("3", energy_error[2])
     print("4", energy_error[3])
 
-    # Plot image energy error x time
-    x = np.arange(len(energy_error[0]))
+    # Plot image energy error x time relates to two turns
+    x = np.arange(0, len(energy_error[0])*dt, dt)
     plt.plot(x, energy_error[0], color="b", label="Euler Cromer")
     plt.plot(x, energy_error[1], color="r", label="Euler Explícito")
     plt.plot(x, energy_error[2], color="g", label="Velocity Verlet")
     plt.plot(x, energy_error[3], color="y", label="Runge Kutta 2")
-    plt.xscale("log")
+    plt.yscale("log")
     plt.xlabel("Time")
     plt.ylabel("Energy Error")
     plt.title("Energy error")
     plt.legend()
     plt.show()
-    plt.savefig("energy_error.jpg")
+    plt.savefig(r"energy_error.png")
